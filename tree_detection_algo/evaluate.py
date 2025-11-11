@@ -21,27 +21,25 @@ def evaluate(tree_gdf, ground_truth, max_dist=5.0):
     """
 
 
-    gt_coords = [[geom.x, geom.y] for geom in ground_truth.geometry]
-    gt = np.array(gt_coords)
-
-    detected_coords = [[geom.x, geom.y] for geom in tree_gdf.geometry]
-    detected = np.array(detected_coords)
-
-    if len(detected) == 0 or len(gt) == 0:
-        return 0, 0, 0
-        
-    tree_gt = cKDTree(gt[:, :2])
+    gt_coords = np.array([[geom.x, geom.y] for geom in ground_truth.geometry])
+    det_coords = np.array([[geom.x, geom.y] for geom in tree_gdf.geometry])
+    
+    if len(det_coords) == 0 or len(gt_coords) == 0:
+        return 0, 0, 0, len(gt_coords), len(det_coords)
+    
+    tree_gt = cKDTree(gt_coords)
+    matched_gt = set()
     matches = 0
-        
-    for det_tree in detected:
-        dist, _ = tree_gt.query(det_tree[:2])
-        if dist <= max_dist:
+    
+    for det in det_coords:
+        dist, idx = tree_gt.query(det, distance_upper_bound=max_dist)
+        # Check if valid match was done as this was inflating the metrics
+        if dist <= max_dist and idx not in matched_gt:
             matches += 1
-        
-    recall = matches / len(gt)
-    precision = matches / len(detected)
+            matched_gt.add(idx)
+    
+    recall = matches / len(gt_coords)
+    precision = matches / len(det_coords)
     f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
-        
-    gt_num = len(gt)
-    detected_num = len(detected)
-    return recall, precision, f1, gt_num, detected_num
+    
+    return recall, precision, f1, len(gt_coords), len(det_coords)
