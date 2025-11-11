@@ -1,11 +1,13 @@
 from scipy.spatial import cKDTree
 import numpy as np
+import geopandas as gpd 
 
-def evaluate(tree_gdf, ground_truth, max_dist=5.0):
+def evaluate(tree_gdf: gpd.GeoDataFrame, ground_truth: gpd.GeoDataFrame, max_dist=5.0) -> tuple[float, float, float, int, int]:
     """ Function that evaluates detections.
 
-    This taken directly off of one kaggle contribution by HEDI FEKI
+    This was adapted off of one kaggle contribution by HEDI FEKI
     (https://www.kaggle.com/code/hedifeki/tree-detection).
+    I just added these checks for already visited indexes later.
     All credits belong to original author 
 
     Args:
@@ -28,6 +30,7 @@ def evaluate(tree_gdf, ground_truth, max_dist=5.0):
         return 0, 0, 0, len(gt_coords), len(det_coords)
     
     tree_gt = cKDTree(gt_coords)
+    # Create a set so we get to know which indexes we already visited
     matched_gt = set()
     matches = 0
     

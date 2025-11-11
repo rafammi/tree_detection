@@ -7,8 +7,17 @@ import laspy
 import numpy as np
 from scipy.spatial import cKDTree
 
-def detect(points,heights,plot_number):
+def detect(points: np.ndarray, heights: np.ndarray, plot_number: str):
+    """ Main algorithm for individual tree detection.
 
+        Args:
+            points: array of masked points from plot
+            heights: array of masked heights used in processing
+
+        Returns:
+            treetops: a dataframe containing tree tops
+            tree_gdf: a gdf containing tree tops as a single point
+    """
 
     tree = cKDTree(points[:, :2])
     radius = 1.3 # test out different radius
@@ -23,11 +32,12 @@ def detect(points,heights,plot_number):
     treetops = points[is_local_max] # filter out points that are local maxes - possible treetops
     print(f"Detected {len(treetops)} local maxima in plot {plot_number}")
 
-    tree_tops = cKDTree(treetops[:, :2])
-    _, nearest_top_idx = tree_tops.query(points[:, :2], k=1)
+    tree_tops = cKDTree(treetops[:, :2]) # query for points that were classfied as potential tree tops
+    _, nearest_top_idx = tree_tops.query(points[:, :2], k=1) # get index of nearest tree top
 
     cluster_labels = nearest_top_idx
 
+    # create dataframe
     df = pd.DataFrame({
     "x": points[:, 0],
     "y": points[:, 1],
@@ -35,17 +45,23 @@ def detect(points,heights,plot_number):
     "cluster": cluster_labels
     })
 
+    # we plot how the clustering looks, this will eventually become one single point
     fig, ax = plt.subplots(1,1)
     ax.scatter(df.x, df.y, c=df.cluster, s=1, cmap='tab20')
     ax.axis('equal')
     plt.savefig(f"images/{plot_number}/clusters.png")
     plt.close()
 
+    # this might not be the best way to cluster these points together but we get
+    # the maximum value of z and assume that it is most likely
+    # the tree top around that cluster
+    # we then take the value of x, y and z make a df containing that info
     treetops = (
     df.loc[df.groupby("cluster")["z"].idxmax(), ["cluster", "x", "y", "z"]]
     .reset_index(drop=True)
     )
 
+    # normal geopandas stuff to create a gdf
     geometry = gpd.points_from_xy(treetops['x'], treetops['y'])
     tree_gdf = gpd.GeoDataFrame(treetops, geometry=geometry, crs="EPSG:32640")
 

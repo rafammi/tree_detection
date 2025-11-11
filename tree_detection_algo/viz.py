@@ -4,10 +4,10 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import rasterio
 from rasterio.plot import show
+from rasterio.io import DatasetReader
 
-
-def view_detections(plot_raster, tree_gdf, ground_truth, plot_number):
-    """ VIsually compare detections vs gt
+def view_detections(plot_raster: DatasetReader, tree_gdf: gpd.GeoDataFrame, ground_truth: gpd.GeoDataFrame, plot_number: str) -> None:
+    """ Visually compare detections vs gt
 
     Args:
         plot_raster: rgb ortho of specified plot number

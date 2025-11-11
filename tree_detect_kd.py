@@ -11,6 +11,18 @@ from tree_detection_algo.evaluate import evaluate
 
 
 def process_plot(plot_number: str):
+    """ Main function to put everything together
+
+        Args:
+            plot_number: plot to be processed
+
+        Returns:
+            recall: recall score for plot
+            precision: precision score for plot
+            f1: harmonic mean of recall and precision for plot
+            gt_num: count of ground truth trees
+            detected_num: treetops detected
+    """
 
     print(f"Processing plot {plot_number}...")
     plot_las, plot_raster, gt, ground_truth = load(plot_number)
