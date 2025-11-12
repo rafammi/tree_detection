@@ -20,11 +20,11 @@ The files pertaining to main detection algorithm are located in `tree_detection_
 
 While this approach might not be the most ideal, it yielded good results when compared to the benchmark, on average:
 
-| Metric    | Avg   |
-|-----------|-------|
-| Recall    | 0.600 |
-| Precision | 0.518 |
-| F1        | 0.543 |
+| Metric    | Avg   | Benchmark | 
+|-----------|-------|-----------| 
+| Recall    | 0.600 |0.571      | 
+| Precision | 0.518 |0.478      | 
+| F1        | 0.543 |0.501      | 
 
 The results of each plot ID can be visualized in the following image:
 
