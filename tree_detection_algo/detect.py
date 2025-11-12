@@ -7,7 +7,7 @@ import laspy
 import numpy as np
 from scipy.spatial import cKDTree
 
-def detect(points: np.ndarray, heights: np.ndarray, plot_number: str):
+def detect(points: np.ndarray, heights: np.ndarray, plot_number: str, radius = 1.3):
     """ Main algorithm for individual tree detection.
 
         Args:
@@ -20,7 +20,6 @@ def detect(points: np.ndarray, heights: np.ndarray, plot_number: str):
     """
 
     tree = cKDTree(points[:, :2])
-    radius = 1.3 # test out different radius
 
     is_local_max = np.zeros(len(points), dtype=bool) # we declare a is_local_max with same length as the points
     for i, (x, y, z) in enumerate(points): #iterate over all points
