@@ -1,13 +1,16 @@
 from pathlib import Path
 import geopandas as gpd
 import csv
-
+import numpy as np
+import pandas as pd
 
 from tree_detection_algo.detect import detect
 from tree_detection_algo.filter import filter_ground
 from tree_detection_algo.load import load
 from tree_detection_algo.viz import view_detections
-from tree_detection_algo.evaluate import evaluate
+from tree_detection_algo.evaluate import calculate_metrics
+from tree_detection_algo.normalize import normalize_cloud_height
+from tree_detection_algo.match import match_candidates
 
 
 def process_plot(plot_number: str):
@@ -25,17 +28,27 @@ def process_plot(plot_number: str):
     """
 
     print(f"Processing plot {plot_number}...")
-    plot_las, plot_raster, gt, ground_truth = load(plot_number)
+    plot_las, plot_raster, field_survey, ground_truth = load(plot_number)
 
-    points, heights = filter_ground(plot_las, 5)
+    plot_las = normalize_cloud_height(plot_las)
+
+    points, heights = filter_ground(plot_las, 2)
 
     treetops, tree_gdf = detect(points,heights,plot_number)
 
-    recall, precision, f1, gt_num, detected_num = evaluate(tree_gdf, ground_truth, max_dist = 5.0)
+
+    gt = np.column_stack((ground_truth.geometry.x, ground_truth.geometry.y, ground_truth["height"]))
+    candidates = treetops[["x", "y", "z"]].to_numpy()
+
+
+    out = match_candidates(gt, candidates, max_distance = 5, max_height_difference=3)
+    out_df = pd.DataFrame(out)
+
+    metrics = pd.DataFrame(calculate_metrics(out_df))
 
     view_detections(plot_raster, tree_gdf, ground_truth, plot_number)
 
-    return recall, precision, f1, gt_num, detected_num
+    return metrics
 
 def main():
     plot_ids = [f"{i:02d}" for i in range(1, 11)]
@@ -44,27 +57,17 @@ def main():
 
     for pid in plot_ids:
         try: 
-            recall, precision, f1, gt_num, detected_num = process_plot(pid)
-            results.append({
-                "plot_id": pid,
-                "recall": recall,
-                "precision": precision,
-                "f1": f1,
-                "gt_num": gt_num,
-                "detected_num": detected_num,
-            })
+            metrics = process_plot(pid)
+            metrics["pid"] = pid
+            results.append(metrics)
         except Exception as e:
             print(f"Error in {pid} - {e}")
     
-    output = "results.csv"
-
-    with open(output, "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=["plot_id", "recall", "precision", "f1",
-                                                "gt_num", "detected_num"])
-        writer.writeheader()
-        writer.writerows(results)
-
-    print(f"Metrics exported to {output}")
+    if results:
+        final_report = pd.concat(results, ignore_index=False)
+        final_report.to_csv("output_adaptive.csv")
+    else:
+        print("Error in report generation")
 
 if __name__ == "__main__":
     main()

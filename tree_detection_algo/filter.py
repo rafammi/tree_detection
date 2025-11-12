@@ -14,13 +14,10 @@ def filter_ground(plot_las: LasData, percentile: int) -> tuple[np.ndarray, np.nd
         heigjts: masked heights used in processing
     """
 
-    points = np.vstack((plot_las.x, plot_las.y, plot_las.z)).T
-    heights = points[:, 2]
-    min_z = np.percentile(heights, percentile) # filter ground points - test different percentiles
-    mask = heights > min_z # I didn't normalize
-    # I do understand that is common practice, but no matter how much I tweaked different parameters for detection
-    # normalization shot the number of possible tree tops way too high
-    points = points[mask]
+    heights = plot_las[:, 2]
+    min_z = np.percentile(heights, 2) 
+    mask = heights > min_z
+    points = plot_las[mask]
     heights = heights[mask]
 
     return points, heights
