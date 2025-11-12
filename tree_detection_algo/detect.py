@@ -18,22 +18,26 @@ def detect(points: np.ndarray, heights: np.ndarray, plot_number: str, radius = 1
             treetops: a dataframe containing tree tops
             tree_gdf: a gdf containing tree tops as a single point
     """
-
+    # Neighborhood structure in k-tree to look for neighbors
     tree = cKDTree(points[:, :2])
 
     is_local_max = np.zeros(len(points), dtype=bool) # we declare a is_local_max with same length as the points
     for i, (x, y, z) in enumerate(points): #iterate over all points
-        idx = tree.query_ball_point([x, y], radius) # we query to get idx
+        # for the current point, return all indices within the euclidean distance defined by radius
+        idx = tree.query_ball_point([x, y], radius)
+        # if index j is higher, set as local maximum
         if z >= np.max(heights[idx]): # if z is higher than the max height at that idx 
             is_local_max[i] = True # we set a local_max
 
-
+    # we get the points considered local maximum
     treetops = points[is_local_max] # filter out points that are local maxes - possible treetops
     print(f"Detected {len(treetops)} local maxima in plot {plot_number}")
 
+    # on top of thiese max points we get another k-tree
     tree_tops = cKDTree(treetops[:, :2]) # query for points that were classfied as potential tree tops
     _, nearest_top_idx = tree_tops.query(points[:, :2], k=1) # get index of nearest tree top
 
+    # we define cluster as points that belong to that nearest possible treetop
     cluster_labels = nearest_top_idx
 
     # create dataframe
