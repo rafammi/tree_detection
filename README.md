@@ -1,9 +1,3 @@
----
-editor_options: 
-  markdown: 
-    wrap: 72
----
-
 ## Tree detection via LiDAR and RGB orthophoto data
 
 This repository aims to work on the data proposed by the paper by
