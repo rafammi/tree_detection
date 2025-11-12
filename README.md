@@ -37,6 +37,11 @@ The results of each plot ID can be visualized in the following image:
 ### Other approaches
 
 -   Usage of ML algorithms to classify pixels based on their r, g, b, z and intensity values are also presented inside `scripts/random_forest.ipynb`, this idea can be fleshed out further, but the main catch was to build a dataframe structure that could be applied as a supervised learning problem by taking important info from both the point cloud and RGB images.
+-   This was mostly a test, showing that this is possible. I tried to match the ground survey points to their respective RGB, z and intensity values by creating a buffer around the trees. After this, concatenate some points where there were not trees via sampling. I sampled because if we just used every singles point of the point cloud / pixel of rgb image, we would have a huge dataframe, we only a few occurences of trees.
+-   With this in mind, the idea of the model was to learn patterns that could discriminate between which combination of band and point cloud information were trees.
+-   Feature importance was verified, showing that the point cloud intensity was the most discriminating column, which was also verified via a visual inspection of the distribution of data, available at `images/<plot_number>/distribution.png`
+-   The metrics acquired can be verified in the following table. Taking a grain of salt as the model learned from a sampled dataset - ie not with the total presence of all pixels / point clouds - so this idea would have to be refined to take into consideration the heavy imbalance something like this would bring.
+-   Further developments would probably involve more sophisticated models that can handle images/point clouds better, such as CNNs.
 
 | plot_id | recall | precision | f1    |
 |---------|--------|-----------|-------|
