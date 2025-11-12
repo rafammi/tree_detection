@@ -7,7 +7,7 @@ import laspy
 import numpy as np
 from scipy.spatial import cKDTree
 
-def detect(points: np.ndarray, heights: np.ndarray, plot_number: str, radius = 1.3):
+def detect(points: np.ndarray, heights: np.ndarray, plot_number: str, radius = 1.3) -> tuple[pd.DataFrame, gpd.GeoDataFrame]:
     """ Main algorithm for individual tree detection.
 
         Args:
