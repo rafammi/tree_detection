@@ -22,9 +22,9 @@ While this approach might not be the most ideal, it yielded good results when co
 
 | Metric    | Avg   | Benchmark | 
 |-----------|-------|-----------| 
-| Recall    | 0.504 |0.571      | 
-| Precision | 0.513 |0.478      | 
-| F1        | 0.51  |0.501      | 
+| Recall    | 0.501 |0.571      | 
+| Precision | 0.734 |0.478      | 
+| F1        | 0.592 |0.501      | 
 
 The results of each plot ID can be visualized in the following image:
 
