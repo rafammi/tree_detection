@@ -15,7 +15,7 @@ def filter_ground(plot_las: LasData, percentile: int) -> tuple[np.ndarray, np.nd
     """
 
     heights = plot_las[:, 2]
-    min_z = np.percentile(heights, 2) 
+    min_z = 3
     mask = heights > min_z
     points = plot_las[mask]
     heights = heights[mask]

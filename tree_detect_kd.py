@@ -3,6 +3,7 @@ import geopandas as gpd
 import csv
 import numpy as np
 import pandas as pd
+import scipy 
 
 from tree_detection_algo.detect import detect
 from tree_detection_algo.filter import filter_ground
@@ -12,6 +13,13 @@ from tree_detection_algo.evaluate import calculate_metrics
 from tree_detection_algo.normalize import normalize_cloud_height
 from tree_detection_algo.match import match_candidates
 
+def crop_by_other(points: np.ndarray, other: np.ndarray) -> np.ndarray:
+    """Crop points by the extent of other."""
+    hull = scipy.spatial.ConvexHull(other[:, :2])
+    vertex_points = hull.points[hull.vertices]
+    delaunay = scipy.spatial.Delaunay(vertex_points)
+    within_hull = delaunay.find_simplex(points[:, :2]) >= 0
+    return points[within_hull]
 
 def process_plot(plot_number: str):
     """ Main function to put everything together
@@ -40,6 +48,7 @@ def process_plot(plot_number: str):
     gt = np.column_stack((ground_truth.geometry.x, ground_truth.geometry.y, ground_truth["height"]))
     candidates = treetops[["x", "y", "z"]].to_numpy()
 
+    candidates = crop_by_other(candidates, gt)
 
     out = match_candidates(gt, candidates, max_distance = 5, max_height_difference=3)
     out_df = pd.DataFrame(out)

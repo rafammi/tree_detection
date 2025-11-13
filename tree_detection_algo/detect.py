@@ -22,32 +22,31 @@ def detect(points: np.ndarray, heights: np.ndarray, plot_number: str) -> tuple[p
 
 
     adaptive_radii = {
-    "01": 1.421053,
-    "02": 1.368421,
-    "03": 1.526316,
-    "04": 1.736842,
-    "05": 1.842105,
-    "06": 1.789474,
-    "07": 1.421053,
-    "08": 1.421053,
-    "09": 1.052632,
-    "10": 1.157895
-    }
+     "01": 1.421053,
+     "02": 1.368421,
+     "03": 1.526316,
+     "04": 1.736842,
+     "05": 1.33,
+     "06": 1.22,
+     "07": 1.11,
+     "08": 1.11,
+     "09": 1.11,
+     "10": 1.00
+     }
     radius = adaptive_radii[plot_number]
+
     tree = cKDTree(points[:, :2])
-
+    sorted_indices = np.argsort(heights)[::-1]
     is_local_max = np.zeros(len(points), dtype=bool) # we declare a is_local_max with same length as the points
-    seen_mask = np.zeros(len(points), dtype=bool)
-    for i, (x, y, z) in enumerate(points): #iterate over all points
-
-        # for the current point, return all indices within the euclidean distance defined by radius
-        idx = tree.query_ball_point([x, y], radius)
-        highest_neighbor = idx[np.argmax(heights[idx])]
-        # if index j is higher, set as local maximum
-        seen_mask[idx] = True
-        seen_mask[highest_neighbor] = False 
-        if i == highest_neighbor:
-            is_local_max[i] = True
+    for idx in sorted_indices:
+        if is_local_max[idx]:  # Skip if already processed as part of another tree
+            continue
+        x, y, z = points[idx, 0], points[idx, 1], points[idx, 2]
+        neighbors = tree.query_ball_point([x, y], radius)
+        if idx == neighbors[np.argmax(heights[neighbors])]:
+            is_local_max[idx] = True
+            is_local_max[neighbors] = False
+            is_local_max[idx] = True
 
     # we get the points considered local maximum
     treetops = points[is_local_max] # filter out points that are local maxes - possible treetops
@@ -68,6 +67,11 @@ def detect(points: np.ndarray, heights: np.ndarray, plot_number: str) -> tuple[p
     "cluster": cluster_labels
     })
 
+
+    cluster_counts = df.groupby('cluster').size()
+    valid_clusters = cluster_counts[cluster_counts >= 20].index
+    df = df[df.cluster.isin(valid_clusters)].copy()
+
     # we plot how the clustering looks, this will eventually become one single point
     fig, ax = plt.subplots(1,1)
     ax.scatter(df.x, df.y, c=df.cluster, s=1, cmap='tab20')
@@ -79,8 +83,14 @@ def detect(points: np.ndarray, heights: np.ndarray, plot_number: str) -> tuple[p
     # the maximum value of z and assume that it is most likely
     # the tree top around that cluster
     # we then take the value of x, y and z make a df containing that info
-    treetops = (df.loc[df.groupby("cluster")["z"].idxmax(),
-        ["cluster", "x", "y", "z"]].reset_index(drop=True))
+    treetops = df.groupby("cluster").apply(
+        lambda g: pd.Series({
+            'cluster': g.name,
+            'x': g.loc[g['z'].idxmax(), 'x'],  # x,y from highest point
+            'y': g.loc[g['z'].idxmax(), 'y'],
+            'z': g['z'].quantile(0.98)  # using the 98th percentile
+        })
+    ).reset_index(drop=True)
 
     # normal geopandas stuff to create a gdf
     geometry = gpd.points_from_xy(treetops['x'], treetops['y'])
