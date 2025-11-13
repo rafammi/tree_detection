@@ -3,7 +3,13 @@ import numpy as np
 import scipy
 
 def _ndarray_to_tuple(array: np.ndarray) -> tuple:
-    """Convert an array to a tuple, replacing np.nan with None."""
+    """Convert an array to a tuple, replacing np.nan with None.
+    
+    
+    This was pulled directly from the 2024 paper as to have a fair comparison
+    between algorithms. All credits are to the original authors
+    
+    """
     return tuple(None if np.isnan(x) else x for x in array)
 
 
@@ -15,6 +21,10 @@ def match_candidates(
     max_height_difference: float,
 ) -> list[dict]:
     """Match ground truth trees to candidates.
+
+
+    This was pulled directly from the 2024 paper as to have a fair comparison
+    between algorithms. All credits are to the original authors
 
     Args:
         ground_truth (np.ndarray): Array of shape (N, 3) with positions and heights of

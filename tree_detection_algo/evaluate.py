@@ -3,6 +3,12 @@ import collections
 import pandas as pd 
 
 def calculate_metrics(group):
+    """Function to evaluate metrics of detected vs ground_truth
+
+    This was pulled directly from the 2024 paper as to have a fair comparison
+    between algorithms. All credits are to the original authors
+    
+    """
     classes = collections.Counter(group["class"])
     metrics = {
         "recall": classes["TP"] / (classes["TP"] + classes["FN"]),
