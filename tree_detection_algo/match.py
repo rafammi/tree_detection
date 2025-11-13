@@ -1,6 +1,5 @@
-from scipy.spatial import cKDTree
+
 import numpy as np
-import geopandas as gpd 
 import scipy
 
 def _ndarray_to_tuple(array: np.ndarray) -> tuple:

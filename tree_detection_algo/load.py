@@ -2,9 +2,8 @@ import laspy
 from laspy import LasData
 import rasterio
 from rasterio.io import DatasetReader
-import pandas as pd
 import geopandas as gpd
-import rasterio
+
 
 def load(plot_number: str) -> tuple[LasData, DatasetReader, gpd.GeoDataFrame, gpd.GeoDataFrame]:
     """ Loads data from specified plot number

@@ -1,6 +1,4 @@
-from scipy.spatial import cKDTree
-import numpy as np
-import geopandas as gpd 
+
 import collections
 import pandas as pd 
 

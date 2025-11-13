@@ -1,9 +1,7 @@
-import pandas as pd 
+
 import geopandas as gpd 
 import matplotlib.pyplot as plt 
-import seaborn as sns
 import rasterio
-from rasterio.plot import show
 from rasterio.io import DatasetReader
 
 def view_detections(plot_raster: DatasetReader, tree_gdf: gpd.GeoDataFrame, ground_truth: gpd.GeoDataFrame, plot_number: str) -> None:

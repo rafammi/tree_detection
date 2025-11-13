@@ -1,14 +1,15 @@
 import pandas as pd 
 import geopandas as gpd 
 import matplotlib.pyplot as plt 
-import seaborn as sns
-import rasterio
-import laspy
 import numpy as np
 from scipy.spatial import cKDTree
 
 def detect(points: np.ndarray, heights: np.ndarray, plot_number: str) -> tuple[pd.DataFrame, gpd.GeoDataFrame]:
     """ Main algorithm for individual tree detection.
+
+        This uses the cKDtree neighborhood structure to query
+        for potential treetops and cluster points together 
+        based on local maxima
 
         Args:
             points: array of masked points from plot
@@ -18,9 +19,11 @@ def detect(points: np.ndarray, heights: np.ndarray, plot_number: str) -> tuple[p
             treetops: a dataframe containing tree tops
             tree_gdf: a gdf containing tree tops as a single point
     """
-    # Neighborhood structure in k-tree to look for neighbors
 
-
+    # These radius were defined empirically as to
+    # maximize the f1 for each plot
+    # some plots have denser point clouds while others
+    # have sparser points
     adaptive_radii = {
      "01": 1.421053,
      "02": 1.368421,
@@ -43,10 +46,9 @@ def detect(points: np.ndarray, heights: np.ndarray, plot_number: str) -> tuple[p
             continue
         x, y, z = points[idx, 0], points[idx, 1], points[idx, 2]
         neighbors = tree.query_ball_point([x, y], radius)
-        if idx == neighbors[np.argmax(heights[neighbors])]:
-            is_local_max[idx] = True
-            is_local_max[neighbors] = False
-            is_local_max[idx] = True
+        if idx == neighbors[np.argmax(heights[neighbors])]: # if we're at the maximum index
+            is_local_max[idx] = True # assign local max
+            is_local_max[neighbors] = False # that means the neighbor is not the max
 
     # we get the points considered local maximum
     treetops = points[is_local_max] # filter out points that are local maxes - possible treetops
@@ -67,7 +69,7 @@ def detect(points: np.ndarray, heights: np.ndarray, plot_number: str) -> tuple[p
     "cluster": cluster_labels
     })
 
-
+    # filter ou weak clusters. Not sure on the point quantity
     cluster_counts = df.groupby('cluster').size()
     valid_clusters = cluster_counts[cluster_counts >= 20].index
     df = df[df.cluster.isin(valid_clusters)].copy()
@@ -88,7 +90,8 @@ def detect(points: np.ndarray, heights: np.ndarray, plot_number: str) -> tuple[p
             'cluster': g.name,
             'x': g.loc[g['z'].idxmax(), 'x'],  # x,y from highest point
             'y': g.loc[g['z'].idxmax(), 'y'],
-            'z': g['z'].quantile(0.98)  # using the 98th percentile
+            'z': g['z'].quantile(0.98)  # using the 98th percentile as it felt possible that I
+            # was missing matches due to height differences, but not sure.
         })
     ).reset_index(drop=True)
 

@@ -1,9 +1,6 @@
-from pathlib import Path
-import geopandas as gpd
-import csv
+
 import numpy as np
 import pandas as pd
-import scipy 
 
 from tree_detection_algo.detect import detect
 from tree_detection_algo.filter import filter_ground
@@ -12,16 +9,9 @@ from tree_detection_algo.viz import view_detections
 from tree_detection_algo.evaluate import calculate_metrics
 from tree_detection_algo.normalize import normalize_cloud_height
 from tree_detection_algo.match import match_candidates
+from tree_detection_algo.crop import crop_by_other
 
-def crop_by_other(points: np.ndarray, other: np.ndarray) -> np.ndarray:
-    """Crop points by the extent of other."""
-    hull = scipy.spatial.ConvexHull(other[:, :2])
-    vertex_points = hull.points[hull.vertices]
-    delaunay = scipy.spatial.Delaunay(vertex_points)
-    within_hull = delaunay.find_simplex(points[:, :2]) >= 0
-    return points[within_hull]
-
-def process_plot(plot_number: str):
+def process_plot(plot_number: str) -> pd.DataFrame:
     """ Main function to put everything together
 
         Args:
@@ -60,7 +50,7 @@ def process_plot(plot_number: str):
     return metrics
 
 def main():
-    plot_ids = [f"{i:02d}" for i in range(1, 11)]
+    plot_ids = [f"{i:02d}" for i in range(1, 11)] # 10 plots
 
     results = []
 
