@@ -8,6 +8,11 @@ def _ndarray_to_tuple(array: np.ndarray) -> tuple:
     
     This was pulled directly from the 2024 paper as to have a fair comparison
     between algorithms. All credits are to the original authors
+
+    Args:
+        array: 3d array of points
+    Returns:
+        a tuple with the same values of x if they are not undefined
     
     """
     return tuple(None if np.isnan(x) else x for x in array)

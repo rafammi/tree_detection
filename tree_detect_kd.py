@@ -26,25 +26,31 @@ def process_plot(plot_number: str) -> pd.DataFrame:
     """
 
     print(f"Processing plot {plot_number}...")
+
+    ## Load data, normalize and filter
     plot_las, plot_raster, field_survey, ground_truth = load(plot_number)
-
     plot_las = normalize_cloud_height(plot_las)
-
     points, heights = filter_ground(plot_las, 2)
 
+    # Actual detection step
     treetops, tree_gdf = detect(points,heights,plot_number)
 
-
+    # Extract detected and ground truth info as an array 
     gt = np.column_stack((ground_truth.geometry.x, ground_truth.geometry.y, ground_truth["height"]))
     candidates = treetops[["x", "y", "z"]].to_numpy()
 
+    # Crop the edges so we don't artificially reduce our metrics
     candidates = crop_by_other(candidates, gt)
 
+    # Try and match between candidates and ground truth
     out = match_candidates(gt, candidates, max_distance = 5, max_height_difference=3)
     out_df = pd.DataFrame(out)
 
+    # Returns metrics
     metrics = pd.DataFrame(calculate_metrics(out_df))
 
+    # Basic plotting. Note: this takes in the candidates before they are cropped
+    # More just to check how our detections are doing
     view_detections(plot_raster, tree_gdf, ground_truth, plot_number)
 
     return metrics

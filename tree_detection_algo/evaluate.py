@@ -8,6 +8,12 @@ def calculate_metrics(group):
     This was pulled directly from the 2024 paper as to have a fair comparison
     between algorithms. All credits are to the original authors
     
+    Args:
+        group: a dataframe structure containing the class of detection
+        TP, FP, TN, FN
+    Returns: 
+        a pd.series with the aggregated metrics: F1, recall, precision and avg_distance between points
+
     """
     classes = collections.Counter(group["class"])
     metrics = {
