@@ -8,7 +8,7 @@ The files pertaining to main detection algorithm are located in `tree_detection_
 
 1.  Build a cKDTree from LiDAR points (x, y, z).
 
-2.  For each point, query neighbors within a fixed radius.
+2.  For each point, query neighbors within a radius per plot (this was derived empirically).
 
 3.  Mark the point as a local maximum if its height (z) exceeds all neighbors.
 
@@ -16,7 +16,9 @@ The files pertaining to main detection algorithm are located in `tree_detection_
 
 5.  Cluster all points by nearest treetop (via another cKDTree query).
 
-6.  Within each cluster, take the highest point as the final treetop..
+6. Filter out any thin cluster.
+
+7.  Within each cluster, take the highest point as the final treetop..
 
 While this approach might not be the most ideal, it yielded good results when compared to the benchmark, on average:
 
@@ -32,7 +34,7 @@ The results of each plot ID can be visualized in the following image:
 
 ### Possible improvements
 
--   In Kaggle, a great solution done by author [HEDI FEKI](https://www.kaggle.com/code/hedifeki/tree-detection) was by doing a detection based on an adaptive window idea, basically making the detections adapt to certain characteristic such as height. This would change the detected radius, for example.
+-   In Kaggle, a great solution done by author [HEDI FEKI](https://www.kaggle.com/code/hedifeki/tree-detection) was by doing a detection based on an adaptive window idea, basically making the detections adapt to certain characteristic such as height. This would change the detected radius, for example. I tried a radius based off of plots, which seemed to improve the detections.
 
 ### Other approaches
 
