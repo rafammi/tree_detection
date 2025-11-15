@@ -47,8 +47,9 @@ def detect(points: np.ndarray, heights: np.ndarray, plot_number: str) -> tuple[p
         x, y, z = points[idx, 0], points[idx, 1], points[idx, 2]
         neighbors = tree.query_ball_point([x, y], radius)
         if idx == neighbors[np.argmax(heights[neighbors])]: # if we're at the maximum index
-            is_local_max[idx] = True # assign local max
-            is_local_max[neighbors] = False # that means the neighbor is not the max
+            is_local_max[idx] = True
+            is_local_max[neighbors] = False
+            is_local_max[idx] = True # that means the neighbor is not the max
 
     # we get the points considered local maximum
     treetops = points[is_local_max] # filter out points that are local maxes - possible treetops

@@ -18,9 +18,9 @@ def load(plot_number: str) -> tuple[LasData, DatasetReader, gpd.GeoDataFrame, gp
         ground_truth: filed survey for specified plot number
     """
 
-    plot_las = laspy.read(f"/home/rafael/Projetos/tree_detection/data/als/plot_{plot_number}.las")
-    plot_raster = rasterio.open(f"/home/rafael/Projetos/tree_detection/data/ortho/plot_{plot_number}.tif")
-    field_survey = gpd.read_file("/home/rafael/Projetos/tree_detection/data/field_survey.geojson")
+    plot_las = laspy.read(f"data/als/plot_{plot_number}.las")
+    plot_raster = rasterio.open(f"data/ortho/plot_{plot_number}.tif")
+    field_survey = gpd.read_file("data/field_survey.geojson")
     ground_truth = field_survey.query(f"plot=={int(plot_number.lstrip("0") or "0")}")
 
     return plot_las, plot_raster, field_survey, ground_truth

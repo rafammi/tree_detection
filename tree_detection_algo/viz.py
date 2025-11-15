@@ -3,6 +3,7 @@ import geopandas as gpd
 import matplotlib.pyplot as plt 
 import rasterio
 from rasterio.io import DatasetReader
+import rasterio.plot
 
 def view_detections(plot_raster: DatasetReader, tree_gdf: gpd.GeoDataFrame, ground_truth: gpd.GeoDataFrame, plot_number: str) -> None:
     """ Visually compare detections vs gt
